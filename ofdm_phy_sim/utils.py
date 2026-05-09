@@ -7,7 +7,7 @@ Provides helper functions used across the simulation pipeline:
 - Eb/N0 and SNR conversions
 - Theoretical BER references
 """
-from constants import *
+from ofdm_phy_sim.constants import *
 import numpy as np
 
 
@@ -19,9 +19,13 @@ def random_bits(n_bits: int | None = None) -> np.ndarray:
     :returns: Equiprobable random bitstring of 0s and 1s.
     :rtype: np.ndarray
     """
-    if n_bits is None:
-        n_bits = np.random.randint(low=MIN_BITSTRING_LENGTH, high=MAX_BITSTRING_LENGTH+1, size=None)
-    return np.random.randint(low=0, high=2, size=n_bits)
+    if n_bits is None or n_bits <= 0:
+        n_bits = np.random.randint(low=MIN_BITSTRING_LENGTH, 
+                                   high=MAX_BITSTRING_LENGTH+1, 
+                                   size=None)
+    return np.random.randint(low=0, 
+                             high=2, 
+                             size=n_bits)
 
 def compute_ber(tx_bits: np.ndarray, rx_bits: np.ndarray) -> float:
     """
