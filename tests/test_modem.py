@@ -9,7 +9,7 @@ Tests cover:
 
 import numpy as np
 import pytest
-from ofdm_phy_sim.modem import modulate
+from ofdm_phy_sim.modem import modulate, demodulate
 from ofdm_phy_sim.constants import BITS_PER_SYMBOL
 
 def test_modulate_invalid_modulation():
@@ -60,3 +60,8 @@ def test_modulate_padding():
     bits = np.ones(5, dtype=int)
     symbols = modulate(bits, 'QPSK')
     assert len(symbols) == 3
+
+def test_modem_roundtrip():
+    for mod in BITS_PER_SYMBOL:
+        bits = np.random.randint(0, 2, 48)
+        assert np.array_equal(bits, demodulate(modulate(bits, mod), mod))

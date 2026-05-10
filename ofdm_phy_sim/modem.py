@@ -101,4 +101,17 @@ def demodulate(symbols: np.ndarray, modulation: str) -> np.ndarray:
     :rtype: np.ndarray
     :raises ValueError: If modulation is not recognised.
     """
-    return np.empty(1)
+    # First, check modulation is valid
+    if modulation not in _MAPS.keys():
+        raise ValueError(f"Unknown modulation '{modulation}'. Choose from {list(_MAPS.keys())}")
+    bits_per_symbol = BITS_PER_SYMBOL[modulation]
+    MAP = _MAPS[modulation]
+
+    # Next, for each received symbol, find the index of the closest map entry
+    indices = np.argmin(np.abs(symbols[:, None] - MAP[None, :]), axis=1)
+
+    # Next, convert indices to binary
+    bits = ((indices[:, None] >> np.arange(bits_per_symbol - 1, -1, -1)) & 1)
+
+    # Finally, return bits
+    return bits.flatten()
