@@ -10,6 +10,7 @@ dependencies = [
     "numpy",
     "scipy",
     "matplotlib",
+    "tqdm",
 ]
 
 [tool.setuptools.packages.find]

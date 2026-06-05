@@ -29,5 +29,6 @@ BITS_PER_SYMBOL = {'BPSK': 1, 'QPSK': 2, '16-QAM': 4}
 
 # Simulation
 
-EBNO_DB_RANGE = (-2, 20)    # Default Eb/N0 sweep range (dB)
-N_TRIALS      = 1000        # Default number of Monte Carlo trials per Eb/N0 point
+EBNO_DB_RANGE      = (-10, 20) # Default Eb/N0 sweep range (dB)
+N_TRIALS_PER_POINT = 2**10    # Default number of Monte Carlo trials per Eb/N0 point
+N_POINTS_PER_CURVE = 2**5     # Default number of points in the Eb/N0 sweep for BER curves
