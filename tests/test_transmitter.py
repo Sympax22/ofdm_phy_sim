@@ -7,8 +7,10 @@ Tests cover:
     - cyclic prefix insertion: output length, CP content matches tail of symbol
 """
 
-from ofdm_phy_sim.transmitter import map_symbols_to_subcarriers
 import numpy as np
+
+from ofdm_phy_sim.transmitter import map_symbols_to_subcarriers_f, ofdm_ifft, insert_cyclic_prefix
+from ofdm_phy_sim.constants   import *
 
 def test_80211a_subcarrier_mapping():
     # 1. Create dummy data: 1 to 48 (so we can track ordering)
@@ -19,7 +21,7 @@ def test_80211a_subcarrier_mapping():
     test_pilots = np.array([100j, 200j, 300j, 400j], dtype=np.complex64)
 
     # Run the mapper
-    ofdm_symbol = map_symbols_to_subcarriers(test_data, test_pilots)
+    ofdm_symbol = map_symbols_to_subcarriers_f(test_data, test_pilots)
 
     # --- ASSERTIONS ---
 
@@ -61,3 +63,70 @@ def test_80211a_subcarrier_mapping():
 
     # The very last data symbol (+26) should be at bin 58
     assert ofdm_symbol[58] == test_data[47], "Last data symbol failed"
+
+
+def test_ofdm_modulate():
+    # ==========================================
+    # TEST 1: Verify the IFFT Shift Mapping
+    # ==========================================
+    physical_freqs = np.arange(-32, 32)
+    shifted_freqs = np.fft.ifftshift(physical_freqs)
+    
+    assert shifted_freqs[0] == 0,   "FAIL: DC (0) did not map to IFFT bin 0"
+    assert shifted_freqs[1] == 1,   "FAIL: Positive freq (+1) mapped incorrectly"
+    assert shifted_freqs[31] == 31, "FAIL: Positive freq (+31) mapped incorrectly"
+    assert shifted_freqs[32] == -32,"FAIL: Lower edge (-32) did not wrap correctly"
+    assert shifted_freqs[63] == -1, "FAIL: Negative freq (-1) did not map to the end"
+
+    # ==========================================
+    # TEST 2: The DC Impulse -> Constant Output
+    # ==========================================
+    centered_dc_array = np.zeros(N_FFT, dtype=np.complex64)
+    centered_dc_array[32] = 1.0 + 0j 
+    
+    # Passing through YOUR function
+    time_domain_dc = ofdm_ifft(centered_dc_array)
+    
+    expected_constant = 1.0 / N_FFT
+    assert np.allclose(time_domain_dc, expected_constant), "FAIL: DC impulse did not yield a constant time-domain signal!"
+
+    # ==========================================
+    # TEST 3: Symmetric Impulses -> Pure Real Cosine
+    # ==========================================
+    centered_cos_array = np.zeros(N_FFT, dtype=np.complex64)
+    centered_cos_array[32 + 4] = 1.0 + 0j 
+    centered_cos_array[32 - 4] = 1.0 + 0j 
+    
+    # Passing through YOUR function
+    time_domain_cos = ofdm_ifft(centered_cos_array)
+    
+    assert np.allclose(np.imag(time_domain_cos), 0), "FAIL: Symmetric input did not cancel imaginary components!"
+
+
+def test_insert_cyclic_prefix():
+    # 1. Create dummy time-domain data (numbers 0 to 63 to easily track indices)
+    dummy_symbol = np.arange(N_FFT)
+    
+    # 2. Run the function
+    symbol_with_cp = insert_cyclic_prefix(dummy_symbol)
+    
+    # --- ASSERTIONS ---
+    
+    # Assertion 1: Check the overall length
+    expected_length = N_FFT + N_CP
+    assert len(symbol_with_cp) == expected_length, \
+        f"FAIL: Expected length {expected_length}, got {len(symbol_with_cp)}"
+    
+    # Assertion 2: Verify the original symbol is perfectly intact at the tail
+    assert np.array_equal(symbol_with_cp[N_CP:], dummy_symbol), \
+        "FAIL: The original symbol payload was corrupted or misplaced!"
+    
+    # Assertion 3: Verify the prefix itself is an exact copy of the last N_CP samples
+    expected_cp = dummy_symbol[-N_CP:]
+    assert np.array_equal(symbol_with_cp[:N_CP], expected_cp), \
+        "FAIL: The copied prefix does not match the end of the original symbol!"
+    
+    # Assertion 4: Spot check the exact transition boundary
+    # The element right after the prefix should be the start of the payload
+    assert symbol_with_cp[N_CP] == dummy_symbol[0], \
+        "FAIL: Boundary mismatch at the transition from CP to original symbol!"

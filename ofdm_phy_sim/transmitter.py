@@ -14,8 +14,8 @@ import numpy as np
 from ofdm_phy_sim.constants import *
 
 
-def map_symbols_to_subcarriers(data_symbols: np.ndarray, 
-                               pilot_symbols: np.ndarray) -> np.ndarray:
+def map_symbols_to_subcarriers_f(data_symbols: np.ndarray, 
+                                 pilot_symbols: np.ndarray) -> np.ndarray:
     """
     Map data and pilot symbols to the appropriate subcarriers in the frequency domain.
 
@@ -27,3 +27,22 @@ def map_symbols_to_subcarriers(data_symbols: np.ndarray,
     subcarrier_array_f[DATA_INDICES]  = data_symbols
     subcarrier_array_f[PILOT_INDICES] = pilot_symbols
     return subcarrier_array_f
+
+def ofdm_ifft(subcarrier_array_f: np.ndarray) -> np.ndarray:
+    """
+    Perform IFFT to convert the frequency-domain subcarrier array into a time-domain OFDM symbol.
+
+    :param subcarrier_array_f: Array of shape (N_FFT,) representing the frequency-domain OFDM symbol.
+    :return: Array of shape (N_FFT,) representing the time-domain OFDM symbol.
+    """
+    return np.fft.ifft(np.fft.ifftshift(subcarrier_array_f))
+
+def insert_cyclic_prefix(ofdm_symbol_td: np.ndarray) -> np.ndarray:
+    """
+    Insert a cyclic prefix (CP) at the beginning of the time-domain OFDM symbol.
+
+    :param ofdm_symbol_td: Array of shape (N_FFT,) representing the time-domain OFDM symbol.
+    :return: Array of shape (N_FFT + N_CP,) representing the OFDM symbol with cyclic prefix.
+    """
+    cyclic_prefix = ofdm_symbol_td[-N_CP:]  # Last N_CP samples become the CP
+    return np.concatenate((cyclic_prefix, ofdm_symbol_td))
