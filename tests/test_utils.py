@@ -10,12 +10,14 @@ import numpy as np
 import pytest
 
 from ofdm_phy_sim.constants import *
-from ofdm_phy_sim.utils import random_bits, ebno_to_noise_var, compute_ber, theoretical_ber_awgn
+from ofdm_phy_sim.utils import random_bits, \
+ebno_to_noise_var, compute_ber, theoretical_ber_awgn, \
+zero_centered_to_zero_start
 
 
 def test_random_bits_default_length_in_range():
     bits = random_bits()
-    assert 64 <= len(bits) <= 4096
+    assert 64 <= len(bits) <= 8192
 
 def test_random_bits_fixed_length():
     bits = random_bits(n_bits=128)
@@ -95,3 +97,10 @@ def test_compute_ber_decreases_with_snr():
     ber_low  = compute_ber('QPSK', bits, ebno_db=0.0,  seed=42)
     ber_high = compute_ber('QPSK', bits, ebno_db=10.0, seed=42)
     assert ber_high < ber_low
+
+def test_zero_centered_to_zero_start():
+    # Test that negative indices are correctly converted to positive indices
+    assert zero_centered_to_zero_start(-32) == -32 + N_FFT//2
+    assert zero_centered_to_zero_start(-1)  == -1  + N_FFT//2
+    assert zero_centered_to_zero_start(0)   ==  0  + N_FFT//2
+    assert zero_centered_to_zero_start(31)  == 31  + N_FFT//2

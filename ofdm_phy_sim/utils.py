@@ -129,3 +129,13 @@ def theoretical_ber_awgn(modulation: str, ebno_db_range: np.ndarray) -> np.ndarr
         return (3/8) * erfc(np.sqrt((2/5)*ebno_linear))
     else:
         raise ValueError(f"Unsupported modulation scheme: {modulation}")
+    
+def zero_centered_to_zero_start(idx: int) -> int:
+    """
+    Converts a negative subcarrier index to its corresponding positive index in the FFT.
+
+    :param idx: Subcarrier index (can be negative or non-negative).
+    :returns: Corresponding positive index in the FFT.
+    :rtype: int
+    """
+    return idx + N_FFT//2
