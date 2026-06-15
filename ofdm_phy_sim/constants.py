@@ -19,6 +19,8 @@ N_SD        = 48            # Number of data subcarriers
 N_ST        = N_SP + N_SD   # = 52 Total number of active subcarriers (data + pilots)
 
 BW          = 20e6          # Channel bandwidth (Hz)
+FS          = BW            # Sampling frequency (Hz), set equal to bandwidth for simplicity
+TS          = 1 / FS        # Sampling period (s)
 BW_MHZ      = BW / 1e6      # Bandwidth in MHz
 DELTA_F     = BW / N_FFT    # Subcarrier spacing (Hz)
 DELTA_F_MHZ = DELTA_F / 1e6 # Subcarrier spacing in MHz
@@ -55,3 +57,27 @@ BITS_PER_SYMBOL = {'BPSK': 1, 'QPSK': 2, '16-QAM': 4}
 EBNO_DB_RANGE      = (-10, 20) # Default Eb/N0 sweep range (dB)
 N_TRIALS_PER_POINT = 2**10     # (=1024) Default number of Monte Carlo trials per Eb/N0 point
 N_POINTS_PER_CURVE = 2**5      # (=32)   Default number of points in the Eb/N0 sweep for BER curves
+
+CHANNEL_MODELS = {
+    'A': {
+        'delays': np.array([0, 10, 20, 30]),           # ns (converted to samples)
+        'power': np.array([1.0, 0.8, 0.6, 0.4]),
+        'description': 'Indoor small delay spread'
+    },
+    'B': {
+        'delays': np.array([0, 10, 20, 35]),
+        'power': np.array([1.0, 0.7, 0.5, 0.3]),
+        'description': 'Indoor medium delay spread'
+    },
+    'C': {
+        'delays': np.array([0, 15, 35, 60, 100, 150]),
+        'power': np.array([1.0, 0.85, 0.7, 0.55, 0.4, 0.2]),
+        'description': 'Indoor large delay spread'
+    },
+    'random': {
+        'delays': lambda: np.array([0] + list(np.sort(np.random.normal(20, 5, 3)))),
+        # ^ means: direct path, then 3 random reflections centered at 20ns with 5ns std dev
+        'power': lambda: np.exp(-np.arange(4) / 1.5),  # exponential decay
+        'description': 'Random delays (mean 20ns), random Rayleigh amplitudes'
+    }
+}

@@ -12,8 +12,7 @@ import pytest
 from ofdm_phy_sim.constants import *
 from ofdm_phy_sim.utils import random_bits, \
 ebno_to_noise_var, compute_ber, theoretical_ber_awgn, \
-zero_centered_to_zero_start
-
+zero_centered_to_zero_start, apply_fractional_delay
 
 def test_random_bits_default_length_in_range():
     bits = random_bits()
@@ -104,4 +103,51 @@ def test_zero_centered_to_zero_start():
     assert zero_centered_to_zero_start(-1)  == -1  + N_FFT//2
     assert zero_centered_to_zero_start(0)   ==  0  + N_FFT//2
     assert zero_centered_to_zero_start(31)  == 31  + N_FFT//2
+
+def test_fractional_delay_no_delay():
+    signal = np.random.rand(100)
+    delayed_signal = apply_fractional_delay(signal, delay_samples=0.0)
+    # No delay: output length = input length, values match
+    assert delayed_signal.shape[0] == signal.shape[0]
+    assert np.allclose(signal, delayed_signal)
+
+def test_fractional_delay_nonzero_delay():
+    signal = np.ones(100)  # Use constant signal for clearer testing
+    delay_samples = 2.5
+    delayed_signal = apply_fractional_delay(signal, delay_samples=delay_samples)
+    
+    # Output length = input + ceil(delay) - 1
+    expected_len = 100 + int(np.ceil(delay_samples)) - 1
+    assert delayed_signal.shape[0] == expected_len
+    
+    # After the delay period, should be close to 1 (the constant signal)
+    assert np.allclose(delayed_signal[5:], 1.0, atol=0.1)
+
+def test_multipath_fading_shape():
+    signal = np.ones(100)
+    max_delay = 2.5
+    delayed_signal = apply_fractional_delay(signal, delay_samples=max_delay)
+    
+    # Output length = input length + ceil(delay)
+    expected_len = 100 + int(np.ceil(max_delay)) - 1
+    assert delayed_signal.shape[0] == expected_len
+
+def test_multipath_fading_zero_delay():
+    signal = np.random.rand(100)
+    delayed_signal = apply_fractional_delay(signal, delay_samples=0.0)
+    
+    assert delayed_signal.shape[0] == signal.shape[0]
+    assert np.allclose(signal, delayed_signal)
+
+def test_multipath_fading_large_delay():
+    signal = np.random.rand(100)
+    delay_samples = 150.0
+    delayed_signal = apply_fractional_delay(signal, delay_samples=delay_samples)
+    
+    # Output length should be 100 + 150 = 250
+    expected_len = 100 + int(np.ceil(delay_samples))
+    assert delayed_signal.shape[0] == expected_len
+    
+    # First 150 samples should be near zero (prepended delay), rest from signal
+    assert np.allclose(delayed_signal[:150], 0.0, atol=1e-10)
 

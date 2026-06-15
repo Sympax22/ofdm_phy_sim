@@ -20,7 +20,6 @@ from ofdm_phy_sim.constants import *
 from ofdm_phy_sim.utils     import simulate_ber_for_modulation, theoretical_ber_awgn
 
 
-
 def plot_all_modulations_ber_awgn():
     """
     Simulates and plots BER vs Eb/N0 for all modulation schemes defined in MODULATIONS.
