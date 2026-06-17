@@ -9,8 +9,8 @@ Tests cover:
 
 import numpy as np
 
-from ofdm_phy_sim.transmitter import insert_cyclic_prefix, ofdm_ifft
-from ofdm_phy_sim.receiver    import remove_cyclic_prefix, ofdm_fft
+from ofdm_phy_sim.transmitter import insert_cyclic_prefix, ofdm_ifft, map_symbols_to_subcarriers_f
+from ofdm_phy_sim.receiver    import remove_cyclic_prefix, ofdm_fft, extract_subcarriers_to_symbols_f
 from ofdm_phy_sim.constants   import *
 
 def test_remove_cyclic_prefix():
@@ -37,3 +37,13 @@ def test_ofdm_fft():
     measured_array = np.mean(test_array, axis=1)
 
     assert np.allclose(measured_array, np.zeros(shape=(N_TESTS,)), atol=1e-16)
+
+
+def test_extract_subcarriers_to_symbols_f():
+    data_symbols  = np.arange(N_SD)
+    pilot_symbols = 1j*np.arange(N_SP)
+    ofdm_symbol = map_symbols_to_subcarriers_f(data_symbols=data_symbols, pilot_symbols=pilot_symbols)
+    result_data_symbols, result_pilot_symbols = extract_subcarriers_to_symbols_f(subcarrier_array_f=ofdm_symbol)
+
+    assert np.array_equal(data_symbols,  result_data_symbols)
+    assert np.array_equal(pilot_symbols, result_pilot_symbols)

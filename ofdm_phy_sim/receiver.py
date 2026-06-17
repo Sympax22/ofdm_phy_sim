@@ -9,6 +9,7 @@ Implements the physical layer receiver pipeline:
 Channel estimation and equalization are handled in equalizer.py.
 Follows 802.11a subcarrier layout (N_FFT=64, N_CP=16, N_DATA=48, N_PILOTS=4).
 """
+from typing import Tuple
 import numpy as np
 
 from ofdm_phy_sim.constants import *
@@ -39,3 +40,19 @@ def ofdm_fft(subcarrier_array_t: np.ndarray) -> np.ndarray:
     :rtype:   np.ndarray, dtype=np.complex64
     """
     return np.fft.fftshift(np.fft.fft(subcarrier_array_t))  
+
+
+def extract_subcarriers_to_symbols_f(subcarrier_array_f: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Extract data and pilot symbols from the frequency-domain subcarrier array.
+
+    :param subcarrier_array_f: Array of shape (N_FFT,) representing the frequency-domain OFDM symbol.
+    :type subcarrier_array_f: np.ndarray, dtype=np.complex64
+    :returns: Tuple of two arrays:
+        - data_symbols: Array of shape (N_DATA,) containing the extracted data symbols.
+        - pilot_symbols: Array of shape (N_PILOTS,) containing the extracted pilot symbols.
+    :rtype: Tuple[np.ndarray, np.ndarray]
+    """
+    data_symbols  = subcarrier_array_f[DATA_INDICES]
+    pilot_symbols = subcarrier_array_f[PILOT_INDICES] 
+    return data_symbols, pilot_symbols
