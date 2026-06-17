@@ -46,3 +46,5 @@ def insert_cyclic_prefix(ofdm_symbol_td: np.ndarray) -> np.ndarray:
     """
     cyclic_prefix = ofdm_symbol_td[-N_CP:]  # Last N_CP samples become the CP
     return np.concatenate((cyclic_prefix, ofdm_symbol_td))
+
+

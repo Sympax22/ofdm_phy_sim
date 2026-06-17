@@ -9,3 +9,20 @@ Implements the physical layer receiver pipeline:
 Channel estimation and equalization are handled in equalizer.py.
 Follows 802.11a subcarrier layout (N_FFT=64, N_CP=16, N_DATA=48, N_PILOTS=4).
 """
+import numpy as np
+
+from ofdm_phy_sim.constants import *
+
+def remove_cyclic_prefix(ofdm_symbol: np.ndarray, 
+                         n_cp=N_CP) -> np.ndarray:
+    """
+    Remove cyclic prefix from a received OFDM symbol.
+
+    :param ofdm_symbol: Array of shape (N_FFT+N_CP,).
+    :type ofdm_symbol: np.ndarray with entry type np.complex64
+    :param n_cp: Length of cyclic prefix.
+    :type n_cp: int 
+    :returns: Array of shape (N_FFT,); N_FFT < N_FFT+N_CP.
+    :rtype: np.ndarray with entry type np.complex64
+    """
+    return ofdm_symbol[n_cp:]

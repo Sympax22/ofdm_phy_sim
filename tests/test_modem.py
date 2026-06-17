@@ -42,7 +42,7 @@ def test_modulate_qpsk_mapping():
     }
     for bits, symbol in expected.items():
         out = modulate(np.array(bits), 'QPSK')
-        assert np.isclose(out[0], symbol), f"QPSK {bits} → expected {symbol}, got {out[0]}"
+        assert np.isclose(out[0], symbol), f"QPSK {bits} -> expected {symbol}, got {out[0]}"
 
 def test_modulate_16qam_mapping():
     expected = {
@@ -53,7 +53,7 @@ def test_modulate_16qam_mapping():
     }
     for bits, symbol in expected.items():
         out = modulate(np.array(bits), '16-QAM')
-        assert np.isclose(out[0], symbol), f"16-QAM {bits} → expected {symbol}, got {out[0]}"
+        assert np.isclose(out[0], symbol), f"16-QAM {bits} -> expected {symbol}, got {out[0]}"
 
 def test_modulate_padding():
     # 5 bits with QPSK (bps=2) should produce 3 symbols (padded to 6 bits)
