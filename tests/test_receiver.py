@@ -9,8 +9,8 @@ Tests cover:
 
 import numpy as np
 
-from ofdm_phy_sim.transmitter import insert_cyclic_prefix
-from ofdm_phy_sim.receiver    import remove_cyclic_prefix
+from ofdm_phy_sim.transmitter import insert_cyclic_prefix, ofdm_ifft
+from ofdm_phy_sim.receiver    import remove_cyclic_prefix, ofdm_fft
 from ofdm_phy_sim.constants   import *
 
 def test_remove_cyclic_prefix():
@@ -22,3 +22,18 @@ def test_remove_cyclic_prefix():
     assert (result_array.shape[0] == N_FFT)
     assert np.array_equal(result_array, test_array)
     assert np.array_equal(result_array, np.sort(result_array))
+
+
+def test_ofdm_fft():
+    N_TESTS = 2**14
+    measured_array = np.empty(shape=(N_TESTS,))
+
+    test_array = np.sqrt(0.5) * (np.random.standard_normal(size=(N_TESTS, N_FFT)) \
+                          + 1j * np.random.standard_normal(size=(N_TESTS, N_FFT)))
+
+    for k in range(N_TESTS):
+        test_array[k, :] -= ofdm_fft(ofdm_ifft(test_array[k, :]))
+        
+    measured_array = np.mean(test_array, axis=1)
+
+    assert np.allclose(measured_array, np.zeros(shape=(N_TESTS,)), atol=1e-16)

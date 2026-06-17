@@ -26,3 +26,16 @@ def remove_cyclic_prefix(ofdm_symbol: np.ndarray,
     :rtype: np.ndarray with entry type np.complex64
     """
     return ofdm_symbol[n_cp:]
+
+
+def ofdm_fft(subcarrier_array_t: np.ndarray) -> np.ndarray:
+    """
+    Perform FFT to convert the time-domain subcarrier array into a frequency-domain OFDM symbol.
+
+    :param subcarrier_array_t: Array of shape (N_FFT,) representing the time-domain OFDM symbol.
+    :type subcarrier_array_t: np.ndarray, dtype=np.complex64
+
+    :returns: Array of shape (N_FFT,) representing the frequency-domain OFDM symbol.
+    :rtype:   np.ndarray, dtype=np.complex64
+    """
+    return np.fft.fftshift(np.fft.fft(subcarrier_array_t))  
