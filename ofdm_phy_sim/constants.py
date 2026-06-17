@@ -27,16 +27,18 @@ DELTA_F_MHZ = DELTA_F / 1e6 # Subcarrier spacing in MHz
 
 
 # Subcarrier Indices (relative to FFT, 802.11a convention)
-PILOT_INDICES_CENTERED = np.array([-21, -7, 7, 21])          # Pilot subcarrier positions
-DC_INDEX_CENTERED  = np.array([0])                       # DC subcarrier (unused)
-DATA_INDICES_CENTERED = np.concatenate([
-    np.arange(-26, -21),
-    np.arange(-20, -7),
-    np.arange(-6, 0),
-    np.arange(1, 7),
-    np.arange(8, 21),
-    np.arange(22, 27)
-])
+PILOT_INDICES_CENTERED      = np.array([-21, -7, 7, 21])          # Pilot subcarrier positions
+DC_INDEX_CENTERED           = np.array([0])                       # DC subcarrier (unused)
+FIRST_DATA_INDICES_CENTERED = np.arange(-26,-21)
+LAST_DATA_INDICES_CENTERED  = np.arange(22, 27)
+DATA_INDICES_CENTERED       = np.concatenate([
+                                np.arange(-26, -21),
+                                np.arange(-20,  -7),
+                                np.arange( -6,   0),
+                                np.arange(  1,   7),
+                                np.arange(  8,  21),
+                                np.arange( 22,  27)
+                                ])
 GUARD_INDICES_CENTERED = np.block([np.arange(-N_FFT//2, -26), 
                                    np.arange(27, N_FFT//2)]) # Unused guard subcarriers
 GUARD_AND_DC_INDICES_CENTERED = np.sort(np.concatenate([GUARD_INDICES_CENTERED, 
@@ -48,6 +50,8 @@ DC_INDEX             = DC_INDEX_CENTERED             + N_FFT // 2
 DATA_INDICES         = DATA_INDICES_CENTERED         + N_FFT // 2
 GUARD_INDICES        = GUARD_INDICES_CENTERED        + N_FFT // 2
 GUARD_AND_DC_INDICES = GUARD_AND_DC_INDICES_CENTERED + N_FFT // 2 # All unused subcarriers
+FIRST_DATA_INDICES   = FIRST_DATA_INDICES_CENTERED   + N_FFT // 2
+LAST_DATA_INDICES    = FIRST_DATA_INDICES_CENTERED   + N_FFT // 2
 
 # Modulation
 MODULATIONS = ['BPSK', 'QPSK', '16-QAM']
@@ -81,3 +85,14 @@ CHANNEL_MODELS = {
         'description': 'Random delays (mean 20ns), random Rayleigh amplitudes'
     }
 }
+
+# Pilots
+PILOT_SEQUENCE = np.array([ 1, 1, 1, 1,  -1,-1,-1, 1,  -1,-1,-1,-1,  1, 1,-1, 1,
+                           -1,-1, 1, 1,  -1, 1, 1,-1,   1, 1, 1, 1,  1, 1,-1, 1,
+                            1, 1,-1, 1,   1,-1,-1, 1,   1, 1,-1, 1, -1,-1,-1, 1,
+                           -1, 1,-1,-1,   1,-1,-1, 1,   1, 1, 1, 1, -1,-1, 1, 1,
+                           -1,-1, 1,-1,   1,-1, 1, 1,  -1,-1,-1, 1,  1,-1,-1,-1,
+                           -1, 1,-1,-1,   1,-1, 1, 1,   1, 1,-1, 1, -1, 1,-1, 1,
+                           -1,-1,-1,-1,  -1, 1,-1, 1,   1,-1, 1,-1,  1, 1 ,1,-1,
+                           -1, 1,-1,-1,  -1, 1, 1, 1,  -1,-1,-1,-1, -1,-1,-1],
+                           dtype=np.complex64)

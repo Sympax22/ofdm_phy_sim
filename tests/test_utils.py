@@ -12,7 +12,8 @@ import pytest
 from ofdm_phy_sim.constants import *
 from ofdm_phy_sim.utils import random_bits, \
 ebno_to_noise_var, compute_ber, theoretical_ber_awgn, \
-zero_centered_to_zero_start, apply_fractional_delay
+zero_centered_to_zero_start, apply_fractional_delay, \
+get_nth_pilots
 
 def test_random_bits_default_length_in_range():
     bits = random_bits()
@@ -151,3 +152,7 @@ def test_multipath_fading_large_delay():
     # First 150 samples should be near zero (prepended delay), rest from signal
     assert np.allclose(delayed_signal[:150], 0.0, atol=1e-10)
 
+def test_get_nth_pilots():
+    assert np.array_equal(get_nth_pilots(0),   np.array([ 1, 1, 1,-1]))
+    assert np.array_equal(get_nth_pilots(126), np.array([-1,-1,-1, 1]))
+    assert np.array_equal(get_nth_pilots(127), np.array([ 1, 1, 1,-1]))  # Wrap around

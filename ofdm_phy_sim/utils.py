@@ -211,3 +211,15 @@ def multipath_fading(signal,
         output += amplitude * delayed_padded
     
     return output
+
+def get_nth_pilots(n: int) -> np.ndarray:
+    """
+    Returns the nth pilot symbol from the PILOT_SEQUENCE, where n is 0-indexed.
+    :param n: Index of the OFDM symbol.
+    :returns: The four pilots of the n-th OFDM symbol.
+    :rtype: np.ndarray
+    """
+    return np.array([PILOT_SEQUENCE[n % 127], 
+                     PILOT_SEQUENCE[n % 127],
+                     PILOT_SEQUENCE[n % 127],
+                  -1*PILOT_SEQUENCE[n % 127]])
